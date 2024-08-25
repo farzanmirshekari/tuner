@@ -22,3 +22,7 @@ class ThreadSafeQueue(object):
     def size(self):
         with self.lock:
             return len(self.queue)
+        
+    def clear(self):
+        with self.lock:
+            self.queue.clear()
