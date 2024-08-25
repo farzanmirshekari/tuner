@@ -14,6 +14,8 @@ class AudioStream(Thread):
     def __init__(self, queue: ThreadSafeQueue):
         Thread.__init__(self)
 
+        self.running = False
+
         self.queue = queue
         self.buffer = np.zeros(self.CHUNK_SIZE * self.CHUNK_COUNT, dtype=np.int16)
         self.hanning_window = np.hanning(len(self.buffer))
@@ -31,7 +33,9 @@ class AudioStream(Thread):
             return
         
     def run(self):
-        while True:
+        self.running = True
+
+        while self.running:
             try:
                 data = np.frombuffer(self.stream.read(self.CHUNK_SIZE, exception_on_overflow=False), dtype=np.int16)
                 self.buffer = np.concatenate((self.buffer[self.CHUNK_SIZE:], data))
@@ -49,3 +53,12 @@ class AudioStream(Thread):
             except Exception as e:
                 print(e)
                 break
+        
+        self.stop()
+
+    def stop(self):
+        self.running = False
+
+        self.stream.stop_stream()
+        self.stream.close()
+        self.audio_object.terminate()
