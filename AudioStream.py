@@ -2,6 +2,7 @@ from ThreadSafeQueue import ThreadSafeQueue
 
 import numpy as np
 from pyaudio import PyAudio, paInt16
+
 from threading import Thread
 
 class AudioStream(Thread):
