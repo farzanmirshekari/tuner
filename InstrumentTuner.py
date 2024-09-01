@@ -13,10 +13,10 @@ class InstrumentTuner(Thread):
         self.running = False
 
     @staticmethod
-    def frequency_to_note_index(frequency):
+    def frequency_to_note(frequency):
         A4 = 440
         C0 = A4 * 2 ** (-4.75)
-        name = ["C", "C#/Db", "D", "D#/Eb", "E", "F", "F#/Gb", "G", "G#/Ab", "A", "A#/Bb", "B"]
+        name = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
         h = round(12 * np.log2(frequency / C0))
         octave = h // 12
         n = h % 12
@@ -27,10 +27,10 @@ class InstrumentTuner(Thread):
 
         while self.running:
             frequency = self.queue.pop()
-            if frequency is not None:
-                self.frequency_to_note_index(frequency)
+            if frequency is not None and frequency > 0:
+                self.frequency_to_note(frequency)
             else:
-                time.sleep(0.01)
+                time.sleep(0.5)
 
     def stop(self):
         self.running = False
