@@ -1,14 +1,16 @@
 from ThreadSafeQueue import ThreadSafeQueue
 
 import numpy as np
+from PyQt6.QtCore import QThread, pyqtSignal
 
-from threading import Thread
 import time
 
-class InstrumentTuner(Thread):
+class InstrumentTuner(QThread):
+
+    note_detected = pyqtSignal(float, float, str)
 
     def __init__(self, queue: ThreadSafeQueue):
-        Thread.__init__(self)
+        QThread.__init__(self)
         self.queue = queue
         self.running = False
 
