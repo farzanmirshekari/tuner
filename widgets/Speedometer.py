@@ -1,6 +1,6 @@
 import numpy as np
 
-from PyQt6.QtCore import QPoint, QRectF, Qt, QPointF, QSize
+from PyQt6.QtCore import QPoint, QPointF, QRectF, Qt
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QColor, QFont, QPainter, QPen
 
@@ -12,8 +12,6 @@ class Speedometer(QWidget):
         self.target_frequency = 440.0
         self.maximum_needle_deviation = 40
 
-        self.setFixedSize(400, 280)
-
     def update_frequency(self, frequency, target_frequency):
         self.frequency = frequency
         self.target_frequency = target_frequency
@@ -24,9 +22,9 @@ class Speedometer(QWidget):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         center = self.rect().center()
-        center.setY(center.y() + 100)
+        center.setY(center.y() + 85)
 
-        radius = min(self.width(), self.height()) / 1.375 - min(self.width(), self.height()) / 8
+        radius = min(self.width(), self.height()) / 1.325 - min(self.width(), self.height()) / 8
 
         needle_zones = 8
         total_angle_span = 180
@@ -85,7 +83,8 @@ class Speedometer(QWidget):
             painter.drawText(QPointF(label_x, label_y), labels[i])
 
     def calculate_needle_angle(self):
-        max_deviation = 40.0
-        deviation = max(-max_deviation, min(self.frequency - self.target_frequency, max_deviation))
-        
-        return 90 - (deviation / max_deviation) * 90
+        deviation = max(
+            -self.maximum_needle_deviation,
+            min(self.frequency - self.target_frequency, self.maximum_needle_deviation)
+        )
+        return 90 - (deviation / self.maximum_needle_deviation) * 90
