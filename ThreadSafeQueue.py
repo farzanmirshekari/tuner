@@ -1,6 +1,7 @@
 from threading import Lock
 
 class ThreadSafeQueue(object):
+    
     def __init__(self):
         self.queue = []
         self.max_size = 10
