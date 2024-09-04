@@ -1,8 +1,9 @@
-import numpy as np
+from styling.StyleManager import StyleManager
 
-from PyQt6.QtCore import QPoint, QPointF, QRectF, Qt
+import numpy as np
+from PyQt6.QtCore import QPointF, QRectF, Qt
 from PyQt6.QtWidgets import QWidget
-from PyQt6.QtGui import QColor, QFont, QPainter, QPen
+from PyQt6.QtGui import QColor, QFont, QPainter, QPen, QPolygonF
 
 class Speedometer(QWidget):
 
@@ -12,41 +13,20 @@ class Speedometer(QWidget):
         self.target_frequency = 440.0
         self.maximum_needle_deviation = 40
 
+        self.style_manager = StyleManager()
+
     def update_frequency(self, frequency, target_frequency):
         self.frequency = frequency
         self.target_frequency = target_frequency
         self.update()
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-        center = self.rect().center()
-        center.setY(center.y() + 85)
-
-        radius = min(self.width(), self.height()) / 1.325 - min(self.width(), self.height()) / 8
-
-        needle_zones = 8
-        total_angle_span = 180
-        angle_increment = total_angle_span / needle_zones
-
-        colors = [
-            QColor(255, 0, 0),
-            QColor(255, 128, 0),
-            QColor(255, 191, 0),
-            QColor(0, 255, 0),
-            QColor(0, 255, 0),
-            QColor(255, 191, 0),
-            QColor(255, 128, 0),
-            QColor(255, 0, 0)
-        ]
-
-        for i in range(needle_zones):
-            start_angle = total_angle_span - i * angle_increment
-
+    def draw_deviation_zones(self, painter: QPainter, center, radius):
+        colors = self.style_manager.deviation_zone_colors
+        for i in range(len(colors)):
+            start_angle = 180 - i * self.style_manager.zone_span
             color = colors[i]
 
-            painter.setPen(QPen(QColor(0, 0, 0)))
+            painter.setPen(self.style_manager.black)
             painter.setBrush(color)
             painter.drawPie(
                 int(center.x() - radius),
@@ -54,25 +34,62 @@ class Speedometer(QWidget):
                 int(2 * radius),
                 int(2 * radius),
                 int(start_angle * 16),
-                int(-angle_increment * 16)
+                int(-self.style_manager.zone_span * 16)
             )
+
+    def draw_needle(self, painter: QPainter, center, radius):
+        needle_length = radius * 0.95
+        needle_width = 8
 
         needle_angle = self.calculate_needle_angle()
 
-        painter.setPen(QPen(QColor(0, 0, 0), 5))
-        painter.drawLine(
-            center,
-            center + QPoint(radius * np.cos(np.radians(needle_angle)), -radius * np.sin(np.radians(needle_angle)))
-        )
+        painter.setPen(QPen(self.style_manager.black))
+        painter.setBrush(self.style_manager.mid_gray)
+        polygon = QPolygonF([
+            QPointF(center.x(), center.y()),
+            QPointF(center.x() + needle_length * np.cos(np.radians(needle_angle)),
+                    center.y() - needle_length * np.sin(np.radians(needle_angle))),
+            QPointF(center.x() + needle_width * np.cos(np.radians(needle_angle + 90)),
+                    center.y() - needle_width * np.sin(np.radians(needle_angle + 90)))
+        ])
+        painter.drawPolygon(polygon)
 
-        label_font = QFont('Digital-7', 16)
+        painter.setBrush(self.style_manager.light_gray)
+        polygon = QPolygonF([
+            QPointF(center.x(), center.y()),
+            QPointF(center.x() + needle_length * np.cos(np.radians(needle_angle)),
+                    center.y() - needle_length * np.sin(np.radians(needle_angle))),
+            QPointF(center.x() + needle_width * np.cos(np.radians(needle_angle - 90)),
+                    center.y() - needle_width * np.sin(np.radians(needle_angle - 90)))
+        ])
+        painter.drawPolygon(polygon)
+
+    def draw_pivot(self, painter: QPainter, center):
+        outer_radius = self.style_manager.pivot_outer_radius
+        inner_radius = self.style_manager.pivot_inner_radius
+        
+        painter.setPen(QPen(self.style_manager.black))
+        painter.setBrush(self.style_manager.light_gray)
+        painter.drawEllipse(center.x() - outer_radius,
+                            center.y() - outer_radius,
+                            outer_radius * 2,
+                            outer_radius * 2)
+        
+        painter.setBrush(QColor(128, 128, 128))
+        painter.drawEllipse(center.x() - inner_radius,
+                            center.y() - inner_radius,
+                            inner_radius * 2,
+                            inner_radius * 2)
+        
+    def draw_labels(self, painter: QPainter, center, radius):
+        label_font = QFont(self.style_manager.font, 16)
         painter.setFont(label_font)
-        painter.setPen(QPen(QColor(255, 255, 255)))
+        painter.setPen(QPen(self.style_manager.white))
         labels = ['-40', '-30', '-20', '-10', '0', '+10', '+20', '+30', '+40']
         label_radius = radius + 20
 
         for i in range(len(labels)):
-            angle_rad = np.radians(180 - i * (total_angle_span / (len(labels) - 1)))
+            angle_rad = np.radians(self.style_manager.speedometer_span - i * (self.style_manager.speedometer_span / (len(labels) - 1)))
             label_x = center.x() + np.cos(angle_rad) * label_radius
             label_y = center.y() - np.sin(angle_rad) * label_radius
 
@@ -81,6 +98,19 @@ class Speedometer(QWidget):
             label_y += text_rect.height() / 2
 
             painter.drawText(QPointF(label_x, label_y), labels[i])
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        center = self.rect().center()
+        center.setY(center.y() + self.height() * 0.35)
+
+        radius = min(self.width(), self.height()) / 1.35 - min(self.width(), self.height()) / 9
+        self.draw_deviation_zones(painter, center, radius)
+        self.draw_needle(painter, center, radius)
+        self.draw_pivot(painter, center)
+        self.draw_labels(painter, center, radius)
 
     def calculate_needle_angle(self):
         deviation = max(
