@@ -31,7 +31,7 @@ class AudioStream(Thread):
                                                  output=False,
                                                  frames_per_buffer=self.CHUNK_SIZE)
         except Exception as e:
-            print(e)
+            print(f"Error opening audio stream: {e}")
             return
         
     @staticmethod
@@ -62,14 +62,14 @@ class AudioStream(Thread):
                 self.queue.push(round(frequencies[np.argmax(magnitude_data)], 2))
 
             except Exception as e:
-                print(e)
+                print(f"Error in audio processing: {e}")
+                self.stop()
                 break
-        
-        self.stop()
-
+            
     def stop(self):
-        self.running = False
-
-        self.stream.stop_stream()
-        self.stream.close()
-        self.audio_object.terminate()
+        if self.running:
+            self.running = False
+            if self.stream.is_active():
+                self.stream.stop_stream()
+            self.stream.close()
+            self.audio_object.terminate()
