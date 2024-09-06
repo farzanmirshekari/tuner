@@ -70,16 +70,16 @@ class Speedometer(QWidget):
         
         painter.setPen(QPen(self.style_manager.black))
         painter.setBrush(self.style_manager.light_gray)
-        painter.drawEllipse(center.x() - outer_radius,
-                            center.y() - outer_radius,
-                            outer_radius * 2,
-                            outer_radius * 2)
+        painter.drawEllipse(int(center.x() - outer_radius),
+                            int(center.y() - outer_radius),
+                            int(outer_radius * 2),
+                            int(outer_radius * 2))
         
         painter.setBrush(QColor(128, 128, 128))
-        painter.drawEllipse(center.x() - inner_radius,
-                            center.y() - inner_radius,
-                            inner_radius * 2,
-                            inner_radius * 2)
+        painter.drawEllipse(int(center.x() - inner_radius),
+                            int(center.y() - inner_radius),
+                            int(inner_radius * 2),
+                            int(inner_radius * 2))
         
     def draw_labels(self, painter: QPainter, center, radius):
         label_font = QFont(self.style_manager.font, 16)
@@ -104,7 +104,7 @@ class Speedometer(QWidget):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         center = self.rect().center()
-        center.setY(center.y() + self.height() * 0.35)
+        center.setY(int(center.y() + self.height() * 0.35))
 
         radius = min(self.width(), self.height()) / 1.35 - min(self.width(), self.height()) / 9
         self.draw_deviation_zones(painter, center, radius)
