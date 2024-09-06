@@ -31,3 +31,30 @@ class StyleManager:
 
         self.pivot_outer_radius = 8 
         self.pivot_inner_radius = self.pivot_outer_radius / 2
+
+        self.main_window_width = 480
+        self.main_window_height = 320
+
+        self.main_window_stylesheet = """
+            QMainWindow {
+                background-color: #1C1C1C;
+            }
+            QLabel {
+                font-size: 23px;
+                color: #FFFFFF;
+                border: 1px solid #333333;
+                padding: 4px;
+                border-radius: 1px;
+                background-color: #262626;
+                font-family: "Digital-7";
+            }
+            QLineEdit {
+                font-size: 23px;
+                color: #FFFFFF;
+                border: 1px solid #333333;
+                padding: 4px;
+                border-radius: 1px;
+                background-color: #262626;
+                font-family: "Digital-7";
+            }
+        """
