@@ -31,7 +31,7 @@ python Application.py
 2. Play the note on your instrument.
 3. Adjust your pitch until the speedometer needle is in the center of the gauge.
 
-As seen in the image below, the speedometer needle will move to the left if the pitch is too low, and to the right if the pitch is too high. The labels on the gauge indicate how far off the pitch is from the desired note. The desired frequency is displayed in the second text box.
+As seen in the image below, the speedometer needle will move to the left if the pitch is too low, and to the right if the pitch is too high. The labels on the gauge indicate how far off the pitch is from the desired note (in Hertz). The target frequency for the selected note is displayed in the second text box:
 
 <img src='assets/demo.png' width=450 />
 
